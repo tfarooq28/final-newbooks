@@ -29,7 +29,9 @@
 
   let netIncome = $derived(totalRevenue - totalExpenses);
 </script>
-
+git add .
+git commit -m "3.4 - form INSERTs new transactions"
+git push
 <div class="max-w-5xl mx-auto p-6 space-y-8">
 
   <!-- HEADER -->
