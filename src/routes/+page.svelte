@@ -1,12 +1,10 @@
 <script>
-  // Reactive local data array
-  let transactions = $state([
-    { id: 1, date: '2026-04-01', description: 'Opening cash deposit', debit: 'Cash', credit: "Owner's Equity", amount: 5000 },
-    { id: 2, date: '2026-04-03', description: 'Consulting fee from client', debit: 'Cash', credit: 'Revenue', amount: 1200 },
-    { id: 3, date: '2026-04-05', description: 'April rent', debit: 'Rent Expense', credit: 'Cash', amount: 800 }
-  ]);
+  // Read database payload elements delivered from +page.server.js
+  let { data } = $props();
 
-  // Account routing categorization rule logic
+  // Bind reactive state variable directly to live server records
+  let transactions = $state(data.transactions);
+
   function classify(t) {
     if (t.credit === 'Revenue') {
       return 'Revenue';
@@ -17,7 +15,6 @@
     }
   }
 
-  // Real-time calculation aggregates using filter and reduce
   let totalRevenue = $derived(
     transactions
       .filter(t => classify(t) === 'Revenue')
@@ -31,8 +28,6 @@
   );
 
   let netIncome = $derived(totalRevenue - totalExpenses);
-</script>
-  // We'll add JavaScript here in Unit 2.
 </script>
 
 <div class="max-w-5xl mx-auto p-6 space-y-8">
