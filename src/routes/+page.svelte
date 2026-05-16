@@ -1,4 +1,37 @@
 <script>
+  // Reactive local data array
+  let transactions = $state([
+    { id: 1, date: '2026-04-01', description: 'Opening cash deposit', debit: 'Cash', credit: "Owner's Equity", amount: 5000 },
+    { id: 2, date: '2026-04-03', description: 'Consulting fee from client', debit: 'Cash', credit: 'Revenue', amount: 1200 },
+    { id: 3, date: '2026-04-05', description: 'April rent', debit: 'Rent Expense', credit: 'Cash', amount: 800 }
+  ]);
+
+  // Account routing categorization rule logic
+  function classify(t) {
+    if (t.credit === 'Revenue') {
+      return 'Revenue';
+    } else if (t.debit.includes('Expense')) {
+      return 'Expense';
+    } else {
+      return 'Other';
+    }
+  }
+
+  // Real-time calculation aggregates using filter and reduce
+  let totalRevenue = $derived(
+    transactions
+      .filter(t => classify(t) === 'Revenue')
+      .reduce((sum, t) => sum + Number(t.amount), 0)
+  );
+
+  let totalExpenses = $derived(
+    transactions
+      .filter(t => classify(t) === 'Expense')
+      .reduce((sum, t) => sum + Number(t.amount), 0)
+  );
+
+  let netIncome = $derived(totalRevenue - totalExpenses);
+</script>
   // We'll add JavaScript here in Unit 2.
 </script>
 
@@ -70,23 +103,25 @@
 
   <!-- INCOME STATEMENT -->
   <section class="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
-    <h2 class="text-xl font-bold text-slate-800 mb-4">Income Statement</h2>
+  <h2 class="text-xl font-bold text-slate-800 mb-4">Income Statement</h2>
 
-    <div class="space-y-2">
-      <div class="flex justify-between text-emerald-700 font-medium">
-        <span>Total Revenue</span>
-        <span>$0.00</span>
-      </div>
-      <div class="flex justify-between text-rose-700 font-medium">
-        <span>Total Expenses</span>
-        <span>$0.00</span>
-      </div>
-      <div class="flex justify-between border-t border-slate-300 pt-2 text-lg font-bold">
-        <span>Net Income</span>
-        <span>$0.00</span>
-      </div>
-    </div>
-  </section>
+  <div class="space-y-2">
+  <div class="flex justify-between text-emerald-700 font-medium">
+    <span>Total Revenue</span>
+    <span>${totalRevenue.toFixed(2)}</span>
+  </div>
+  <div class="flex justify-between text-rose-700 font-medium">
+    <span>Total Expenses</span>
+    <span>${totalExpenses.toFixed(2)}</span>
+  </div>
+  <div class="flex justify-between border-t border-slate-300 pt-2 text-lg font-bold">
+    <span>Net Income</span>
+    <span class={netIncome >= 0 ? 'text-emerald-700' : 'text-rose-700'}>
+      ${netIncome.toFixed(2)}
+    </span>
+  </div>
+</div>
+</section>
 
   <!-- TRANSACTIONS LIST -->
   <section class="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
@@ -105,12 +140,25 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="border-t border-slate-200">
-            <td colspan="6" class="px-3 py-6 text-center text-slate-400 italic">
-              No transactions yet. Add one using the form above.
-            </td>
-          </tr>
-        </tbody>
+  {#each transactions as t (t.id)}
+    <tr class="border-t border-slate-200 hover:bg-slate-50">
+      <td class="px-3 py-2">{t.date}</td>
+      <td class="px-3 py-2">{t.description}</td>
+      <td class="px-3 py-2">{t.debit}</td>
+      <td class="px-3 py-2">{t.credit}</td>
+      <td class="px-3 py-2 text-right">${Number(t.amount).toFixed(2)}</td>
+      <td class="px-3 py-2">
+        {#if classify(t) === 'Revenue'}
+          <span class="text-emerald-700 font-medium">Revenue</span>
+        {:else if classify(t) === 'Expense'}
+          <span class="text-rose-700 font-medium">Expense</span>
+        {:else}
+          <span class="text-slate-400">Other</span>
+        {/if}
+      </td>
+    </tr>
+  {/each}
+</tbody>
       </table>
     </div>
   </section>
